@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de QR</title>
+</head>
+<body>
+    <h1>Generador de Código QR</h1>
+    <form method="POST">
+        <label for="data">Introduce el texto para generar el QR:</label>
+        <input type="text" name="data" id="data" required>
+        <button type="submit">Generar QR</button>
+    </form>
+
+    {% if img_url %}
+        <h2>Tu código QR generado:</h2>
+        <img src="{{ img_url }}" alt="Código QR">
+    {% endif %}
+</body>
+</html>
