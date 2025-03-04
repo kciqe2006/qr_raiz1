@@ -4,182 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de QR - Raíz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJrTHTXkC6Xk5J2CXjx8pzuHq8IRl5p0p4dX5wDymQmN8l7zAYr82kkI9R1g" crossorigin="anonymous">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-        }
-        main {
-            margin: 20px;
-        }
-        label {
-            font-size: 18px;
-            display: block;
-            margin-bottom: 5px;
-        }
-        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea {
+        #map {
+            height: 300px;
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .qr-image {
-            margin-top: 20px;
-            display: block;
-            max-width: 100%;
-            height: auto;
-        }
-        #dynamic-form {
-            display: none;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Generador de QR - Raíz</h1>
-    </header>
 
-    <main>
-        <h2>Selecciona una opción para generar tu QR</h2>
-        <form id="qr-form" action="" method="POST">
-            <label for="qr-type">Tipo de QR:</label>
-            <select id="qr-type" name="qr-type">
-                <option value="">Selecciona una opción</option>
+<div class="container mt-5">
+    <h1 class="text-center">Generador de Códigos QR - Raíz</h1>
+    <form action="/generate_qr" method="POST">
+        <div class="mb-3">
+            <label for="qr-type" class="form-label">Selecciona el tipo de QR:</label>
+            <select name="qr-type" id="qr-type" class="form-select" required>
                 <option value="sms">SMS</option>
-                <option value="url">Enlace</option>
+                <option value="url">URL</option>
                 <option value="wifi">Wi-Fi</option>
-                <option value="location">Localización</option>
-                <option value="vcard">Tarjeta de contacto</option>
-                <option value="email">Correo electrónico</option>
+                <option value="location">Ubicación</option>
+                <option value="vcard">VCard</option>
+                <option value="email">Email</option>
                 <option value="video">Video</option>
             </select>
+        </div>
 
-            <div id="dynamic-form">
-                <!-- El formulario dinámico se generará aquí -->
+        <div id="sms-fields" class="qr-fields">
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">Número de teléfono:</label>
+                <input type="text" class="form-control" id="phone_number" name="phone_number" required>
             </div>
+            <div class="mb-3">
+                <label for="message" class="form-label">Mensaje:</label>
+                <input type="text" class="form-control" id="message" name="message" required>
+            </div>
+        </div>
 
-            <button type="submit">Generar QR</button>
-        </form>
-    </main>
+        <div id="url-fields" class="qr-fields">
+            <div class="mb-3">
+                <label for="url" class="form-label">URL:</label>
+                <input type="text" class="form-control" id="url" name="url" required>
+            </div>
+        </div>
 
-    <script>
-        const qrTypeSelect = document.getElementById('qr-type');
-        const dynamicForm = document.getElementById('dynamic-form');
-        const qrForm = document.getElementById('qr-form');
+        <div id="wifi-fields" class="qr-fields">
+            <div class="mb-3">
+                <label for="ssid" class="form-label">SSID (Nombre de red):</label>
+                <input type="text" class="form-control" id="ssid" name="ssid" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="encryption" class="form-label">Método de cifrado:</label>
+                <select name="encryption" id="encryption" class="form-select" required>
+                    <option value="WPA">WPA</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">Sin contraseña</option>
+                </select>
+            </div>
+        </div>
 
-        qrTypeSelect.addEventListener('change', function() {
-            const selectedOption = qrTypeSelect.value;
-            dynamicForm.innerHTML = ''; // Limpiar formulario dinámico antes de agregar nuevos campos
+        <div id="location-fields" class="qr-fields">
+            <div id="map"></div>
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+        </div>
 
-            if (selectedOption) {
-                dynamicForm.style.display = 'block'; // Mostrar el formulario dinámico
-                switch (selectedOption) {
-                    case 'sms':
-                        dynamicForm.innerHTML = `
-                            <label for="phone_number">Número de teléfono:</label>
-                            <input type="text" id="phone_number" name="phone_number" required>
-                            <label for="message">Mensaje:</label>
-                            <input type="text" id="message" name="message" required>
-                        `;
-                        break;
-                    case 'url':
-                        dynamicForm.innerHTML = `
-                            <label for="url">Enlace (URL):</label>
-                            <input type="url" id="url" name="url" required>
-                        `;
-                        break;
-                    case 'wifi':
-                        dynamicForm.innerHTML = `
-                            <label for="ssid">Nombre de la red (SSID):</label>
-                            <input type="text" id="ssid" name="ssid" required>
-                            <label for="password">Contraseña:</label>
-                            <input type="password" id="password" name="password" required>
-                            <label for="encryption">Tipo de encriptación:</label>
-                            <input type="text" id="encryption" name="encryption" required>
-                        `;
-                        break;
-                    case 'location':
-                        dynamicForm.innerHTML = `
-                            <label for="latitude">Latitud:</label>
-                            <input type="number" id="latitude" name="latitude" step="any" required>
-                            <label for="longitude">Longitud:</label>
-                            <input type="number" id="longitude" name="longitude" step="any" required>
-                        `;
-                        break;
-                    case 'vcard':
-                        dynamicForm.innerHTML = `
-                            <label for="name">Nombre:</label>
-                            <input type="text" id="name" name="name" required>
-                            <label for="phone">Teléfono:</label>
-                            <input type="text" id="phone" name="phone" required>
-                            <label for="email">Correo electrónico:</label>
-                            <input type="email" id="email" name="email" required>
-                            <label for="address">Dirección:</label>
-                            <input type="text" id="address" name="address" required>
-                        `;
-                        break;
-                    case 'email':
-                        dynamicForm.innerHTML = `
-                            <label for="email_subject">Asunto:</label>
-                            <input type="text" id="email_subject" name="email_subject" required>
-                            <label for="email_body">Cuerpo del mensaje:</label>
-                            <textarea id="email_body" name="email_body" required></textarea>
-                        `;
-                        break;
-                    case 'video':
-                        dynamicForm.innerHTML = `
-                            <label for="video_url">URL del Video:</label>
-                            <input type="url" id="video_url" name="video_url" required>
-                        `;
-                        break;
-                    default:
-                        dynamicForm.style.display = 'none';
-                        break;
-                }
-            } else {
-                dynamicForm.style.display = 'none';
-            }
+        <div id="vcard-fields" class="qr-fields">
+            <div class="mb-3">
+                <label for="name" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Teléfono:</label>
+                <input type="text" class="form-control" id="phone" name="phone" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Dirección:</label>
+                <input type="text" class="form-control" id="address" name="address" required>
+            </div>
+        </div>
+
+        <div id="email-fields" class="qr-fields">
+            <div class="mb-3">
+                <label for="email_subject" class="form-label">Asunto:</label>
+                <input type="text" class="form-control" id="email_subject" name="email_subject" required>
+            </div>
+            <div class="mb-3">
+                <label for="email_body" class="form-label">Cuerpo del correo:</label>
+                <textarea class="form-control" id="email_body" name="email_body" rows="3" required></textarea>
+            </div>
+        </div>
+
+        <div id="video-fields" class="qr-fields">
+            <div class="mb-3">
+                <label for="video_url" class="form-label">URL del video:</label>
+                <input type="text" class="form-control" id="video_url" name="video_url" required>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary">Generar QR</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 37.7749, lng: -122.4194}, // Latitud y longitud por defecto
+            zoom: 13
         });
 
-        qrForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(qrForm);
+        google.maps.event.addListener(map, 'click', function(event) {
+            var lat = event.latLng.lat();
+            var lng = event.latLng.lng();
 
-            fetch('/generate_qr', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.blob())
-            .then(blob => {
-                const qrImage = document.createElement('img');
-                qrImage.src = URL.createObjectURL(blob);
-                qrImage.classList.add('qr-image');
-                document.body.appendChild(qrImage);
-            })
-            .catch(error => console.error('Error al generar el QR:', error));
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
         });
-    </script>
+    }
+</script>
+
 </body>
 </html>
+
 
