@@ -62,7 +62,7 @@
 <body>
     <div class="container">
         <h1>Generador de Código QR</h1>
-        <form action="/generate_qr" method="POST">
+        <form action="/generate_qr" method="POST" id="qr-form" enctype="multipart/form-data">
             <label for="qr-type">Selecciona el tipo de QR:</label>
             <select id="qr-type" name="qr-type" required>
                 <option value="sms">SMS</option>
@@ -75,16 +75,16 @@
             </select>
 
             <!-- Campos de entrada para cada tipo de QR -->
-            <div id="sms-fields">
+            <div id="sms-fields" style="display: none;">
                 <input type="text" name="phone_number" placeholder="Número de teléfono" required>
                 <input type="text" name="message" placeholder="Mensaje" required>
             </div>
 
-            <div id="url-fields">
+            <div id="url-fields" style="display: none;">
                 <input type="url" name="url" placeholder="URL" required>
             </div>
 
-            <div id="wifi-fields">
+            <div id="wifi-fields" style="display: none;">
                 <input type="text" name="ssid" placeholder="SSID" required>
                 <input type="text" name="password" placeholder="Contraseña" required>
                 <select name="encryption" required>
@@ -94,24 +94,24 @@
                 </select>
             </div>
 
-            <div id="location-fields">
+            <div id="location-fields" style="display: none;">
                 <input type="text" name="latitude" placeholder="Latitud" required>
                 <input type="text" name="longitude" placeholder="Longitud" required>
             </div>
 
-            <div id="vcard-fields">
+            <div id="vcard-fields" style="display: none;">
                 <input type="text" name="name" placeholder="Nombre" required>
                 <input type="text" name="phone" placeholder="Teléfono" required>
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="text" name="address" placeholder="Dirección" required>
             </div>
 
-            <div id="email-fields">
+            <div id="email-fields" style="display: none;">
                 <input type="text" name="email_subject" placeholder="Asunto" required>
                 <input type="text" name="email_body" placeholder="Cuerpo del email" required>
             </div>
 
-            <div id="video-fields">
+            <div id="video-fields" style="display: none;">
                 <input type="url" name="video_url" placeholder="URL del video" required>
             </div>
 
@@ -125,15 +125,15 @@
     <script>
         // Mostrar campos según el tipo de QR seleccionado
         document.getElementById('qr-type').addEventListener('change', function() {
-            let selectedType = this.value;
-            document.querySelectorAll('div[id$="-fields"]').forEach(function(div) {
-                div.style.display = 'none';
+            const selectedType = this.value;
+            const allFields = ['sms', 'url', 'wifi', 'location', 'vcard', 'email', 'video'];
+
+            allFields.forEach(function(type) {
+                document.getElementById(type + '-fields').style.display = 'none';
             });
+
             document.getElementById(selectedType + '-fields').style.display = 'block';
         });
-
-        // Inicializa con los campos ocultos, solo muestra los del primer tipo de QR
-        document.getElementById('qr-type').dispatchEvent(new Event('change'));
     </script>
 </body>
 </html>
