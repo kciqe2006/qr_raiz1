@@ -117,13 +117,12 @@
 
             <button type="submit">Generar Código QR</button>
         </form>
-        <div id="qr-image">
-            <!-- La imagen del QR será insertada aquí después de la generación -->
-        </div>
+
+        <!-- Aquí se mostrará la imagen del QR -->
+        <div id="qr-image"></div>
     </div>
 
     <script>
-        // Mostrar campos según tipo de QR seleccionado
         document.getElementById('qr-type').addEventListener('change', function() {
             const selectedType = this.value;
             const allFields = ['sms', 'url', 'wifi', 'location', 'vcard', 'email', 'video'];
@@ -135,7 +134,6 @@
             document.getElementById(selectedType + '-fields').style.display = 'block';
         });
 
-        // Manejar la respuesta del formulario (mostrar QR generado)
         const form = document.getElementById('qr-form');
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -158,3 +156,4 @@
     </script>
 </body>
 </html>
+
