@@ -3,146 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Códigos QR</title>
+    <title>Generador de QR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
+            flex-direction: column;
         }
+
         .container {
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             text-align: center;
         }
-        select, input, button {
-            margin: 10px 0;
-            padding: 10px;
-            width: 100%;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
         }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
         button {
             background-color: #4CAF50;
             color: white;
+            font-size: 1.1em;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
-        .qr-code {
+
+        img {
             margin-top: 20px;
-            display: flex;
-            justify-content: center;
+            max-width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Generador de Códigos QR</h2>
+        <h1>Generador de Código QR</h1>
         <form action="/generate_qr" method="POST">
-            <select name="qr-type" id="qr-type" required>
-                <option value="" disabled selected>Selecciona un tipo de QR</option>
+            <label for="qr-type">Selecciona el tipo de QR:</label>
+            <select id="qr-type" name="qr-type" required>
                 <option value="sms">SMS</option>
                 <option value="url">URL</option>
                 <option value="wifi">Wi-Fi</option>
                 <option value="location">Ubicación</option>
-                <option value="vcard">VCard</option>
+                <option value="vcard">vCard</option>
                 <option value="email">Email</option>
-                <option value="video">Video</option>
+                <option value="video">Video URL</option>
             </select>
 
-            <!-- Campos que se mostrarán según el tipo de QR -->
-            <div id="sms-fields" style="display:none;">
+            <!-- Campos de entrada para cada tipo de QR -->
+            <div id="sms-fields">
                 <input type="text" name="phone_number" placeholder="Número de teléfono" required>
-                <input type="text" name="message" placeholder="Mensaje SMS" required>
+                <input type="text" name="message" placeholder="Mensaje" required>
             </div>
-            <div id="url-fields" style="display:none;">
+
+            <div id="url-fields">
                 <input type="url" name="url" placeholder="URL" required>
             </div>
-            <div id="wifi-fields" style="display:none;">
+
+            <div id="wifi-fields">
                 <input type="text" name="ssid" placeholder="SSID" required>
-                <input type="password" name="password" placeholder="Contraseña Wi-Fi" required>
+                <input type="text" name="password" placeholder="Contraseña" required>
                 <select name="encryption" required>
                     <option value="WPA">WPA</option>
                     <option value="WEP">WEP</option>
-                    <option value="None">Ninguna</option>
+                    <option value="nopassword">Sin contraseña</option>
                 </select>
             </div>
-            <div id="location-fields" style="display:none;">
+
+            <div id="location-fields">
                 <input type="text" name="latitude" placeholder="Latitud" required>
                 <input type="text" name="longitude" placeholder="Longitud" required>
             </div>
-            <div id="vcard-fields" style="display:none;">
+
+            <div id="vcard-fields">
                 <input type="text" name="name" placeholder="Nombre" required>
                 <input type="text" name="phone" placeholder="Teléfono" required>
-                <input type="email" name="email" placeholder="Correo electrónico" required>
+                <input type="email" name="email" placeholder="Email" required>
                 <input type="text" name="address" placeholder="Dirección" required>
             </div>
-            <div id="email-fields" style="display:none;">
+
+            <div id="email-fields">
                 <input type="text" name="email_subject" placeholder="Asunto" required>
-                <input type="text" name="email_body" placeholder="Cuerpo del mensaje" required>
+                <input type="text" name="email_body" placeholder="Cuerpo del email" required>
             </div>
-            <div id="video-fields" style="display:none;">
+
+            <div id="video-fields">
                 <input type="url" name="video_url" placeholder="URL del video" required>
             </div>
 
-            <button type="submit">Generar QR</button>
+            <button type="submit">Generar Código QR</button>
         </form>
-
-        <!-- Mostrar el código QR generado -->
-        <div class="qr-code">
-            <img id="qr-image" src="" alt="QR Code" style="display:none;">
+        <div id="qr-image">
+            <!-- La imagen del QR será insertada aquí después de la generación -->
         </div>
     </div>
 
     <script>
-        const qrTypeSelect = document.getElementById('qr-type');
-        const smsFields = document.getElementById('sms-fields');
-        const urlFields = document.getElementById('url-fields');
-        const wifiFields = document.getElementById('wifi-fields');
-        const locationFields = document.getElementById('location-fields');
-        const vcardFields = document.getElementById('vcard-fields');
-        const emailFields = document.getElementById('email-fields');
-        const videoFields = document.getElementById('video-fields');
-
-        qrTypeSelect.addEventListener('change', function() {
-            const selectedType = qrTypeSelect.value;
-
-            // Ocultar todos los campos
-            smsFields.style.display = 'none';
-            urlFields.style.display = 'none';
-            wifiFields.style.display = 'none';
-            locationFields.style.display = 'none';
-            vcardFields.style.display = 'none';
-            emailFields.style.display = 'none';
-            videoFields.style.display = 'none';
-
-            // Mostrar solo los campos relevantes
-            if (selectedType === 'sms') {
-                smsFields.style.display = 'block';
-            } else if (selectedType === 'url') {
-                urlFields.style.display = 'block';
-            } else if (selectedType === 'wifi') {
-                wifiFields.style.display = 'block';
-            } else if (selectedType === 'location') {
-                locationFields.style.display = 'block';
-            } else if (selectedType === 'vcard') {
-                vcardFields.style.display = 'block';
-            } else if (selectedType === 'email') {
-                emailFields.style.display = 'block';
-            } else if (selectedType === 'video') {
-                videoFields.style.display = 'block';
-            }
+        // Mostrar campos según el tipo de QR seleccionado
+        document.getElementById('qr-type').addEventListener('change', function() {
+            let selectedType = this.value;
+            document.querySelectorAll('div[id$="-fields"]').forEach(function(div) {
+                div.style.display = 'none';
+            });
+            document.getElementById(selectedType + '-fields').style.display = 'block';
         });
+
+        // Inicializa con los campos ocultos, solo muestra los del primer tipo de QR
+        document.getElementById('qr-type').dispatchEvent(new Event('change'));
     </script>
 </body>
 </html>
