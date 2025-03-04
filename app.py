@@ -1,80 +1,68 @@
-import os
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_file
 import qrcode
+from io import BytesIO
 
 app = Flask(__name__)
 
-# Ruta para la página principal
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Ruta para generar el QR para SMS
-@app.route('/generate_sms_qr', methods=['POST'])
-def generate_sms_qr():
-    # Obtener el número de teléfono y el mensaje desde el formulario
-    phone_number = request.form['phone_number']
-    message = request.form['message']
+@app.route('/generate_qr', methods=['POST'])
+def generate_qr():
+    qr_type = request.form.get('qr-type')
+    img = None
+    # Generación de QR según el tipo elegido
+    if qr_type == 'sms':
+        phone_number = request.form.get('phone_number')
+        message = request.form.get('message')
+        qr_data = f"SMSTO:{phone_number}:{message}"
+    elif qr_type == 'url':
+        qr_data = request.form.get('url')
+    elif qr_type == 'wifi':
+        ssid = request.form.get('ssid')
+        password = request.form.get('password')
+        encryption = request.form.get('encryption')
+        qr_data = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
+    elif qr_type == 'location':
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
+        qr_data = f"geo:{latitude},{longitude}"
+    elif qr_type == 'vcard':
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        email = request.form.get('email')
+        address = request.form.get('address')
+        qr_data = f"BEGIN:VCARD\nVERSION:3.0\nFN:{name}\nTEL:{phone}\nEMAIL:{email}\nADR:{address}\nEND:VCARD"
+    elif qr_type == 'email':
+        subject = request.form.get('email_subject')
+        body = request.form.get('email_body')
+        qr_data = f"mailto:?subject={subject}&body={body}"
+    elif qr_type == 'video':
+        qr_data = request.form.get('video_url')
+    else:
+        return "Error: Tipo de QR no reconocido.", 400
 
-    # Generar el QR
-    qr_data = f"SMSTO:{phone_number}:{message}"
-    qr = qrcode.make(qr_data)
-    
-    # Guardar la imagen en la carpeta estática
-    qr_path = os.path.join('static', 'sms_qr.png')
-    qr.save(qr_path)
+    # Generar el código QR
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(qr_data)
+    qr.make(fit=True)
 
-    return send_from_directory('static', 'sms_qr.png')
+    # Crear una imagen del QR
+    img = qr.make_image(fill='black', back_color='white')
 
-# Ruta para generar el QR para enlace web
-@app.route('/generate_url_qr', methods=['POST'])
-def generate_url_qr():
-    # Obtener la URL desde el formulario
-    url = request.form['url']
+    # Guardar la imagen en un objeto de bytes
+    img_io = BytesIO()
+    img.save(img_io, 'PNG')
+    img_io.seek(0)
 
-    # Generar el QR
-    qr = qrcode.make(url)
-    
-    # Guardar la imagen en la carpeta estática
-    qr_path = os.path.join('static', 'url_qr.png')
-    qr.save(qr_path)
-
-    return send_from_directory('static', 'url_qr.png')
-
-# Ruta para generar el QR para Wi-Fi
-@app.route('/generate_wifi_qr', methods=['POST'])
-def generate_wifi_qr():
-    # Obtener SSID, contraseña y tipo de encriptación desde el formulario
-    ssid = request.form['ssid']
-    password = request.form['password']
-    encryption = request.form['encryption']
-
-    # Crear el QR para la red Wi-Fi
-    qr_data = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
-    qr = qrcode.make(qr_data)
-    
-    # Guardar la imagen en la carpeta estática
-    qr_path = os.path.join('static', 'wifi_qr.png')
-    qr.save(qr_path)
-
-    return send_from_directory('static', 'wifi_qr.png')
-
-# Ruta para generar el QR para ubicación
-@app.route('/generate_location_qr', methods=['POST'])
-def generate_location_qr():
-    # Obtener la latitud y longitud desde el formulario
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-
-    # Crear el QR para la ubicación
-    qr_data = f"geo:{latitude},{longitude}"
-    qr = qrcode.make(qr_data)
-    
-    # Guardar la imagen en la carpeta estática
-    qr_path = os.path.join('static', 'location_qr.png')
-    qr.save(qr_path)
-
-    return send_from_directory('static', 'location_qr.png')
+    # Enviar la imagen del QR como respuesta
+    return send_file(img_io, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)
