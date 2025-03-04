@@ -123,16 +123,37 @@
     </div>
 
     <script>
-        // Mostrar campos según el tipo de QR seleccionado
+        // Mostrar campos según tipo de QR seleccionado
         document.getElementById('qr-type').addEventListener('change', function() {
             const selectedType = this.value;
             const allFields = ['sms', 'url', 'wifi', 'location', 'vcard', 'email', 'video'];
-
+            
             allFields.forEach(function(type) {
                 document.getElementById(type + '-fields').style.display = 'none';
             });
-
+            
             document.getElementById(selectedType + '-fields').style.display = 'block';
+        });
+
+        // Manejar la respuesta del formulario (mostrar QR generado)
+        const form = document.getElementById('qr-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            fetch('/generate_qr', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(imageBlob => {
+                const imageUrl = URL.createObjectURL(imageBlob);
+                document.getElementById('qr-image').innerHTML = `<img src="${imageUrl}" alt="Código QR">`;
+            })
+            .catch(error => {
+                alert("Error al generar el QR. Intenta nuevamente.");
+            });
         });
     </script>
 </body>
