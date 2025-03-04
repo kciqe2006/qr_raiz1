@@ -12,6 +12,8 @@ def index():
 def generate_qr():
     qr_type = request.form.get('qr-type')
     img = None
+    qr_data = None
+
     # Generación de QR según el tipo elegido
     if qr_type == 'sms':
         phone_number = request.form.get('phone_number')
@@ -43,6 +45,9 @@ def generate_qr():
     else:
         return "Error: Tipo de QR no reconocido.", 400
 
+    if not qr_data:
+        return "Error: No se proporcionaron datos suficientes para generar el QR.", 400
+
     # Generar el código QR
     qr = qrcode.QRCode(
         version=1,
@@ -66,4 +71,3 @@ def generate_qr():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
