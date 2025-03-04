@@ -12,10 +12,9 @@ def index():
 @app.route('/generate_qr', methods=['POST'])
 def generate_qr():
     qr_type = request.form.get('qr-type')
-    img = None
     qr_data = None
     
-    # Verifica que los datos necesarios sean enviados para cada tipo de QR
+    # Validar y manejar cada tipo de QR
     if qr_type == 'sms':
         phone_number = request.form.get('phone_number')
         message = request.form.get('message')
@@ -89,4 +88,3 @@ def generate_qr():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Usa el puerto proporcionado por Render o 5000 por defecto
     app.run(host='0.0.0.0', port=port, debug=True)
-
