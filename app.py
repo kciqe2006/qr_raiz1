@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 import qrcode
 from io import BytesIO
 
@@ -21,11 +21,11 @@ def generate_qr():
         if phone_number and message:
             qr_data = f"SMSTO:{phone_number}:{message}"
         else:
-            return "Error: SMS data incomplete.", 400
+            return jsonify(error="SMS data incomplete."), 400
     elif qr_type == 'url':
         qr_data = request.form.get('url')
         if not qr_data:
-            return "Error: URL is required.", 400
+            return jsonify(error="URL is required."), 400
     elif qr_type == 'wifi':
         ssid = request.form.get('ssid')
         password = request.form.get('password')
@@ -33,14 +33,14 @@ def generate_qr():
         if ssid and password and encryption:
             qr_data = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
         else:
-            return "Error: Wi-Fi data incomplete.", 400
+            return jsonify(error="Wi-Fi data incomplete."), 400
     elif qr_type == 'location':
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
         if latitude and longitude:
             qr_data = f"geo:{latitude},{longitude}"
         else:
-            return "Error: Location data incomplete.", 400
+            return jsonify(error="Location data incomplete."), 400
     elif qr_type == 'vcard':
         name = request.form.get('name')
         phone = request.form.get('phone')
@@ -49,20 +49,20 @@ def generate_qr():
         if name and phone and email and address:
             qr_data = f"BEGIN:VCARD\nVERSION:3.0\nFN:{name}\nTEL:{phone}\nEMAIL:{email}\nADR:{address}\nEND:VCARD"
         else:
-            return "Error: vCard data incomplete.", 400
+            return jsonify(error="vCard data incomplete."), 400
     elif qr_type == 'email':
         subject = request.form.get('email_subject')
         body = request.form.get('email_body')
         if subject and body:
             qr_data = f"mailto:?subject={subject}&body={body}"
         else:
-            return "Error: Email data incomplete.", 400
+            return jsonify(error="Email data incomplete."), 400
     elif qr_type == 'video':
         qr_data = request.form.get('video_url')
         if not qr_data:
-            return "Error: Video URL is required.", 400
+            return jsonify(error="Video URL is required."), 400
     else:
-        return "Error: Tipo de QR no reconocido.", 400
+        return jsonify(error="QR type not recognized."), 400
 
     # Generar el código QR
     qr = qrcode.QRCode(
