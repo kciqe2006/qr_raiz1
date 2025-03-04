@@ -1,30 +1,42 @@
 import os
 from flask import Flask, render_template
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Esto obtiene el puerto desde la variable de entorno
-    app.run(host="0.0.0.0", port=port)  # Asegúrate de que esté escuchando en 0.0.0.0
 import qrcode
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+# Ruta principal con método GET
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        data = request.form['data']
-        if data:
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(data)
-            qr.make(fit=True)
-            img = qr.make_image(fill='black', back_color='white')
-            img.save('static/qr_code.png')
-            return render_template('index.html', img_url='static/qr_code.png')
     return render_template('index.html')
 
+# Ruta para generar QR de WiFi
+@app.route('/generate_wifi_qr', methods=['POST'])
+def generate_wifi_qr():
+    ssid = request.form['ssid']
+    password = request.form['password']
+    qr = qrcode.make(f"WIFI:T:WPA;S:{ssid};P:{password};;")
+    qr.save("static/wifi_qr.png")
+    return send_from_directory("static", "wifi_qr.png")
+
+# Ruta para generar QR de video (enlace)
+@app.route('/generate_video_qr', methods=['POST'])
+def generate_video_qr():
+    video_url = request.form['video_url']
+    qr = qrcode.make(video_url)
+    qr.save("static/video_qr.png")
+    return send_from_directory("static", "video_qr.png")
+
+# Ruta para generar QR de geolocalización
+@app.route('/generate_location_qr', methods=['POST'])
+def generate_location_qr():
+    latitude = request.form['latitude']
+    longitude = request.form['longitude']
+    location_url = f"https://www.google.com/maps?q={latitude},{longitude}"
+    qr = qrcode.make(location_url)
+    qr.save("static/location_qr.png")
+    return send_from_directory("static", "location_qr.png")
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Usar el puerto de Render si está disponible
+    app.run(host="0.0.0.0", port=port)
+
