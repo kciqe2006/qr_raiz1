@@ -20,9 +20,6 @@
         main {
             margin: 20px;
         }
-        form {
-            margin-bottom: 20px;
-        }
         label {
             font-size: 18px;
             display: block;
@@ -52,6 +49,10 @@
             max-width: 100%;
             height: auto;
         }
+        #dynamic-form {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -60,50 +61,124 @@
     </header>
 
     <main>
-        <h2>Generar QR para SMS</h2>
-        <form action="/generate_sms_qr" method="POST">
-            <label for="phone_number">Número de teléfono:</label>
-            <input type="text" id="phone_number" name="phone_number" required>
+        <h2>Selecciona una opción para generar tu QR</h2>
+        <form id="qr-form" action="" method="POST">
+            <label for="qr-type">Tipo de QR:</label>
+            <select id="qr-type" name="qr-type">
+                <option value="">Selecciona una opción</option>
+                <option value="sms">SMS</option>
+                <option value="url">Enlace</option>
+                <option value="wifi">Wi-Fi</option>
+                <option value="location">Localización</option>
+                <option value="vcard">Tarjeta de contacto</option>
+                <option value="email">Correo electrónico</option>
+                <option value="video">Video</option>
+            </select>
 
-            <label for="message">Mensaje:</label>
-            <input type="text" id="message" name="message" required>
-
-            <button type="submit">Generar QR</button>
-        </form>
-
-        <h2>Generar QR para URL</h2>
-        <form action="/generate_url_qr" method="POST">
-            <label for="url">Enlace (URL):</label>
-            <input type="url" id="url" name="url" required>
-
-            <button type="submit">Generar QR</button>
-        </form>
-
-        <h2>Generar QR para Wi-Fi</h2>
-        <form action="/generate_wifi_qr" method="POST">
-            <label for="ssid">Nombre de la red (SSID):</label>
-            <input type="text" id="ssid" name="ssid" required>
-
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="encryption">Tipo de encriptación:</label>
-            <input type="text" id="encryption" name="encryption" required>
-
-            <button type="submit">Generar QR</button>
-        </form>
-
-        <h2>Generar QR para ubicación</h2>
-        <form action="/generate_location_qr" method="POST">
-            <label for="latitude">Latitud:</label>
-            <input type="number" id="latitude" name="latitude" step="any" required>
-
-            <label for="longitude">Longitud:</label>
-            <input type="number" id="longitude" name="longitude" step="any" required>
+            <div id="dynamic-form">
+                <!-- El formulario dinámico se generará aquí -->
+            </div>
 
             <button type="submit">Generar QR</button>
         </form>
     </main>
+
+    <script>
+        const qrTypeSelect = document.getElementById('qr-type');
+        const dynamicForm = document.getElementById('dynamic-form');
+        const qrForm = document.getElementById('qr-form');
+
+        qrTypeSelect.addEventListener('change', function() {
+            const selectedOption = qrTypeSelect.value;
+            dynamicForm.innerHTML = ''; // Limpiar formulario dinámico antes de agregar nuevos campos
+
+            if (selectedOption) {
+                dynamicForm.style.display = 'block'; // Mostrar el formulario dinámico
+                switch (selectedOption) {
+                    case 'sms':
+                        dynamicForm.innerHTML = `
+                            <label for="phone_number">Número de teléfono:</label>
+                            <input type="text" id="phone_number" name="phone_number" required>
+                            <label for="message">Mensaje:</label>
+                            <input type="text" id="message" name="message" required>
+                        `;
+                        break;
+                    case 'url':
+                        dynamicForm.innerHTML = `
+                            <label for="url">Enlace (URL):</label>
+                            <input type="url" id="url" name="url" required>
+                        `;
+                        break;
+                    case 'wifi':
+                        dynamicForm.innerHTML = `
+                            <label for="ssid">Nombre de la red (SSID):</label>
+                            <input type="text" id="ssid" name="ssid" required>
+                            <label for="password">Contraseña:</label>
+                            <input type="password" id="password" name="password" required>
+                            <label for="encryption">Tipo de encriptación:</label>
+                            <input type="text" id="encryption" name="encryption" required>
+                        `;
+                        break;
+                    case 'location':
+                        dynamicForm.innerHTML = `
+                            <label for="latitude">Latitud:</label>
+                            <input type="number" id="latitude" name="latitude" step="any" required>
+                            <label for="longitude">Longitud:</label>
+                            <input type="number" id="longitude" name="longitude" step="any" required>
+                        `;
+                        break;
+                    case 'vcard':
+                        dynamicForm.innerHTML = `
+                            <label for="name">Nombre:</label>
+                            <input type="text" id="name" name="name" required>
+                            <label for="phone">Teléfono:</label>
+                            <input type="text" id="phone" name="phone" required>
+                            <label for="email">Correo electrónico:</label>
+                            <input type="email" id="email" name="email" required>
+                            <label for="address">Dirección:</label>
+                            <input type="text" id="address" name="address" required>
+                        `;
+                        break;
+                    case 'email':
+                        dynamicForm.innerHTML = `
+                            <label for="email_subject">Asunto:</label>
+                            <input type="text" id="email_subject" name="email_subject" required>
+                            <label for="email_body">Cuerpo del mensaje:</label>
+                            <textarea id="email_body" name="email_body" required></textarea>
+                        `;
+                        break;
+                    case 'video':
+                        dynamicForm.innerHTML = `
+                            <label for="video_url">URL del Video:</label>
+                            <input type="url" id="video_url" name="video_url" required>
+                        `;
+                        break;
+                    default:
+                        dynamicForm.style.display = 'none';
+                        break;
+                }
+            } else {
+                dynamicForm.style.display = 'none';
+            }
+        });
+
+        qrForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(qrForm);
+
+            fetch('/generate_qr', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const qrImage = document.createElement('img');
+                qrImage.src = URL.createObjectURL(blob);
+                qrImage.classList.add('qr-image');
+                document.body.appendChild(qrImage);
+            })
+            .catch(error => console.error('Error al generar el QR:', error));
+        });
+    </script>
 </body>
 </html>
-
