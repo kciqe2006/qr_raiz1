@@ -4,90 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de QR</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="my-5 text-center">Generador de Código QR</h1>
 
-        <form method="POST" action="/generate_qr">
-            <div class="form-group">
-                <label for="qr-type">Tipo de QR:</label>
-                <select class="form-control" id="qr-type" name="qr-type">
-                    <option value="sms">SMS</option>
-                    <option value="url">URL</option>
-                    <option value="wifi">WiFi</option>
-                    <option value="location">Ubicación</option>
-                    <option value="vcard">VCard</option>
-                    <option value="email">Email</option>
-                    <option value="video">Video</option>
-                </select>
-            </div>
-            
-            <div id="sms-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="phone_number" placeholder="Número de teléfono">
-                <input class="form-control my-2" type="text" name="message" placeholder="Mensaje">
-            </div>
-
-            <div id="url-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="url" placeholder="URL">
-            </div>
-
-            <div id="wifi-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="ssid" placeholder="Nombre de red WiFi (SSID)">
-                <input class="form-control my-2" type="password" name="password" placeholder="Contraseña">
-                <select class="form-control my-2" name="encryption">
-                    <option value="WPA">WPA</option>
-                    <option value="WEP">WEP</option>
-                    <option value="nopass">Sin contraseña</option>
-                </select>
-            </div>
-
-            <div id="location-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="latitude" placeholder="Latitud">
-                <input class="form-control my-2" type="text" name="longitude" placeholder="Longitud">
-            </div>
-
-            <div id="vcard-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="name" placeholder="Nombre">
-                <input class="form-control my-2" type="text" name="phone" placeholder="Teléfono">
-                <input class="form-control my-2" type="email" name="email" placeholder="Correo electrónico">
-                <input class="form-control my-2" type="text" name="address" placeholder="Dirección">
-            </div>
-
-            <div id="email-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="email_subject" placeholder="Asunto">
-                <input class="form-control my-2" type="text" name="email_body" placeholder="Cuerpo del mensaje">
-            </div>
-
-            <div id="video-fields" class="qr-fields">
-                <input class="form-control my-2" type="text" name="video_url" placeholder="URL del video">
-            </div>
-
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-primary">Generar QR</button>
-            </div>
-        </form>
-
-        <div class="text-center mt-5">
-            <h3>Escanea tu código QR:</h3>
-            <img id="qr-image" src="" alt="QR Code" class="img-fluid mt-4">
+<div class="container mt-5">
+    <h2 class="text-center">Generador de Códigos QR</h2>
+    <form method="POST" action="/generate_qr" id="qr-form">
+        <div class="form-group">
+            <label for="qr-type">Tipo de QR:</label>
+            <select class="form-control" id="qr-type" name="qr-type" required>
+                <option value="sms">SMS</option>
+                <option value="url">URL</option>
+                <option value="wifi">WiFi</option>
+                <option value="location">Ubicación</option>
+                <option value="vcard">VCard</option>
+                <option value="email">Email</option>
+                <option value="video">Video</option>
+            </select>
         </div>
-    </div>
 
-    <script>
-        $(document).ready(function () {
+        <!-- Campos para SMS -->
+        <div id="sms-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="phone_number" placeholder="Número de teléfono" required>
+            <input class="form-control my-2" type="text" name="message" placeholder="Mensaje" required>
+        </div>
+
+        <!-- Campos para URL -->
+        <div id="url-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="url" placeholder="URL" required>
+        </div>
+
+        <!-- Campos para WiFi -->
+        <div id="wifi-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="ssid" placeholder="Nombre de red WiFi (SSID)" required>
+            <input class="form-control my-2" type="password" name="password" placeholder="Contraseña" required>
+            <select class="form-control my-2" name="encryption" required>
+                <option value="WPA">WPA</option>
+                <option value="WEP">WEP</option>
+                <option value="nopass">Sin contraseña</option>
+            </select>
+        </div>
+
+        <!-- Campos para ubicación -->
+        <div id="location-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="latitude" placeholder="Latitud" required>
+            <input class="form-control my-2" type="text" name="longitude" placeholder="Longitud" required>
+        </div>
+
+        <!-- Campos para VCard -->
+        <div id="vcard-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="name" placeholder="Nombre" required>
+            <input class="form-control my-2" type="text" name="phone" placeholder="Teléfono" required>
+            <input class="form-control my-2" type="email" name="email" placeholder="Correo electrónico" required>
+            <input class="form-control my-2" type="text" name="address" placeholder="Dirección" required>
+        </div>
+
+        <!-- Campos para email -->
+        <div id="email-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="email_subject" placeholder="Asunto" required>
+            <input class="form-control my-2" type="text" name="email_body" placeholder="Cuerpo del mensaje" required>
+        </div>
+
+        <!-- Campos para video -->
+        <div id="video-fields" class="qr-fields">
+            <input class="form-control my-2" type="text" name="video_url" placeholder="URL del video" required>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Generar QR</button>
+        </div>
+    </form>
+
+    <div class="mt-4" id="qr-result">
+        <h4 class="text-center">Código QR generado:</h4>
+        <img id="qr-image" src="" alt="QR Code" class="img-fluid mx-auto d-block">
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".qr-fields").hide();
+        $("#qr-type").change(function () {
+            var selected = $(this).val();
             $(".qr-fields").hide();
-            $("#qr-type").change(function () {
-                var selected = $(this).val();
-                $(".qr-fields").hide();
-                $("#" + selected + "-fields").show();
+            $("#" + selected + "-fields").show();
+        });
+
+        $("#qr-form").submit(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento por defecto
+            var formData = $(this).serialize();
+            $.post("/generate_qr", formData, function (data) {
+                $("#qr-result").show();
+                $("#qr-image").attr("src", URL.createObjectURL(data));
             });
         });
-    </script>
+    });
+</script>
+
 </body>
 </html>
-
