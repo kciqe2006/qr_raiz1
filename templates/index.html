@@ -49,7 +49,7 @@
     <div class="container">
         <h2>Generador de Códigos QR</h2>
         <form action="/generate_qr" method="POST">
-            <select name="qr-type" required>
+            <select name="qr-type" id="qr-type" required>
                 <option value="" disabled selected>Selecciona un tipo de QR</option>
                 <option value="sms">SMS</option>
                 <option value="url">URL</option>
@@ -105,7 +105,7 @@
     </div>
 
     <script>
-        const qrTypeSelect = document.querySelector('select[name="qr-type"]');
+        const qrTypeSelect = document.getElementById('qr-type');
         const smsFields = document.getElementById('sms-fields');
         const urlFields = document.getElementById('url-fields');
         const wifiFields = document.getElementById('wifi-fields');
@@ -113,17 +113,35 @@
         const vcardFields = document.getElementById('vcard-fields');
         const emailFields = document.getElementById('email-fields');
         const videoFields = document.getElementById('video-fields');
-        const qrImage = document.getElementById('qr-image');
 
         qrTypeSelect.addEventListener('change', function() {
             const selectedType = qrTypeSelect.value;
-            smsFields.style.display = selectedType === 'sms' ? 'block' : 'none';
-            urlFields.style.display = selectedType === 'url' ? 'block' : 'none';
-            wifiFields.style.display = selectedType === 'wifi' ? 'block' : 'none';
-            locationFields.style.display = selectedType === 'location' ? 'block' : 'none';
-            vcardFields.style.display = selectedType === 'vcard' ? 'block' : 'none';
-            emailFields.style.display = selectedType === 'email' ? 'block' : 'none';
-            videoFields.style.display = selectedType === 'video' ? 'block' : 'none';
+
+            // Ocultar todos los campos
+            smsFields.style.display = 'none';
+            urlFields.style.display = 'none';
+            wifiFields.style.display = 'none';
+            locationFields.style.display = 'none';
+            vcardFields.style.display = 'none';
+            emailFields.style.display = 'none';
+            videoFields.style.display = 'none';
+
+            // Mostrar solo los campos relevantes
+            if (selectedType === 'sms') {
+                smsFields.style.display = 'block';
+            } else if (selectedType === 'url') {
+                urlFields.style.display = 'block';
+            } else if (selectedType === 'wifi') {
+                wifiFields.style.display = 'block';
+            } else if (selectedType === 'location') {
+                locationFields.style.display = 'block';
+            } else if (selectedType === 'vcard') {
+                vcardFields.style.display = 'block';
+            } else if (selectedType === 'email') {
+                emailFields.style.display = 'block';
+            } else if (selectedType === 'video') {
+                videoFields.style.display = 'block';
+            }
         });
     </script>
 </body>
